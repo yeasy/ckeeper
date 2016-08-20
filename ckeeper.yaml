@@ -1,0 +1,8 @@
+logging:
+  level: info
+host:
+  daemon: "tcp://localhost:2375"
+check:
+  retries: 3  # days
+  interval: 5  # seconds
+
