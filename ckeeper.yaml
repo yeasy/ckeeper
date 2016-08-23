@@ -1,8 +1,13 @@
 logging:
-  level: info
+  level: debug
 host:
-  daemon: "tcp://localhost:2375"
+  daemon: "unix:///var/run/docker.sock"
 check:
   retries: 3  # days
   interval: 5  # seconds
-
+rules:
+  rule1:
+    filter:
+      All: true
+    condition: "ls"
+    action: "a1"
