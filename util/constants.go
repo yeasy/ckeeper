@@ -26,3 +26,4 @@ const RootName = "ckeeper"
 var LogFormat = logging.MustStringFormatter(
 	`%{color}%{time:15:04:05.000} %{shortfunc} ▶ %{level:.4s} %{id:03x}%{color:reset} %{message}`,
 )
+var logger = logging.MustGetLogger("ckeeper.util")

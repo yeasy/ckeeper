@@ -3,11 +3,22 @@ logging:
 host:
   daemon: "unix:///var/run/docker.sock"
 check:
-  retries: 3  # days
-  interval: 5  # seconds
-rules:
-  rule1:
-    filter:
+  retries: 3  # retries before thinking the container is unhealthy
+  interval: 5  # seconds to wait between two checks
+rules:  # currently the rules are processed in order
+  rule_web:
+    option:   # container filter
       All: true
-    condition: "ls"
-    action: "a1"
+      Filters:
+        status:
+          - running
+    target: '[[ `curl -sL -w "%{http_code}\\n" CONTAINER:80 -o /dev/null` == "200" ]]'
+    action: "restart"
+  rule_start:
+    option:   # container filter
+      All: true
+      Filters:
+        status:
+          - exited
+          - stopped
+    action: "start"

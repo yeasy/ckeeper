@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+	"github.com/fsouza/go-dockerclient"
 )
 
 //SetField will set a obj's variable with given value
@@ -27,4 +28,18 @@ func SetField(obj interface{}, name string, value interface{}) error {
 
 	structFieldValue.Set(val)
 	return nil
+}
+
+
+func GetContainerIP(container docker.APIContainers) string {
+	return container.Networks.Networks["bridge"].IPAddress
+}
+
+func ListHasString(value string, list []string) bool {
+    for _, v := range list {
+        if v == value {
+            return true
+        }
+    }
+    return false
 }

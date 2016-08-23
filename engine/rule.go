@@ -5,9 +5,10 @@ import (
 )
 
 type Rule struct {
-	filter    docker.ListContainersOptions
-	condition string
-	action    string
+	name string
+	option docker.ListContainersOptions
+	target  string
+	action  string
 }
 
 type RuleSet struct {

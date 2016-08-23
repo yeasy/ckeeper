@@ -21,7 +21,7 @@ func TestRuleSet_AddRule(t *testing.T) {
 	rs.AddRule("test_rule", rule)
 
 	result := rs.GetRules()
-	if result["test_rule"].condition != "condition" {
+	if result["test_rule"].target != "condition" {
 		t.Error("Mismatch condition filed on the inserted rule")
 	}
 	if len(result) != 1 {

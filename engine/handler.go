@@ -7,6 +7,7 @@ import (
 	"github.com/yeasy/ckeeper/util"
 	"strings"
 	"bytes"
+	"os/exec"
 )
 
 var logger = logging.MustGetLogger("ckeeper.engine")
@@ -22,56 +23,90 @@ func NewHanlder() *Handler {
 	return &handler
 }
 
-// Load will read in all rules from config
-func (h *Handler) Load() {
-	r := make(map[string]interface{})
-	for name, _ := range viper.GetStringMap("rules") {
-		err := viper.UnmarshalKey("rules."+name, &r)
+
+// Load will read the rules from config
+func (h *Handler) Load() error {
+	r := Rule{}
+	option := docker.ListContainersOptions{}
+	for name, _:= range viper.GetStringMap("rules") {
+		err := viper.UnmarshalKey("rules." + name + ".option", &option)
 		if err != nil {
 			logger.Errorf("unable to decode into struct, %+v", err)
-			return
+			return err
 		}
-		filter := r["filter"].(map[interface{}]interface{})
-		options := docker.ListContainersOptions{}
-		for k, v := range filter {
-			util.SetField(&options, k.(string), v)
+		if util.ListHasString("rules." + name + ".option.Filters", viper.AllKeys()) {
+			option.Filters = viper.GetStringMapStringSlice("rules." + name + ".option.Filters")
 		}
-		condition := r["condition"].(string)
-		action := r["action"].(string)
-		h.ruleset.AddRule(name, Rule{options, condition, action})
+		r.name = name
+		r.option = option
+		r.target = viper.GetString("rules." + name + ".target")
+		r.action = viper.GetString("rules." + name + ".action")
+		logger.Debugf("%s=%+v", name, r)
+		h.ruleset.AddRule(name, r)
 	}
-	logger.Debugf("Loaded %d rules...", len(h.ruleset.GetRules()))
+	logger.Infof("Loaded rules: %d", len(h.ruleset.GetRules()))
 	logger.Debugf("%+v", h.ruleset.GetRules())
+	return nil
 }
 
+// Process will check each rule and run it
 func (h *Handler) Process() {
 	endpoint := viper.GetString("host.daemon")
 	client, _ := docker.NewClient(endpoint)
-
 	done := make(chan int)
-	// Process each rule
-	for name, r := range h.ruleset.GetRules() {
-		logger.Debugf("Processing rule %s:%+v", name, r)
-		h.containers, _ = client.ListContainers(r.filter)
+	triggered := 0
 
-		for _, c := range h.containers {
-			go execCmd(client, c, []string{r.condition}, done)
-			logger.Infof("Run %s on container %s", r.condition, c.ID)
+	// Process each rule
+	for name, rule := range h.ruleset.GetRules() {
+		logger.Debugf("Processing rule %+v", rule)
+		h.containers, _ = client.ListContainers(rule.option)
+		if len(h.containers) <= 0 {
+			logger.Infof("No container matched rule %s", name)
+			continue
 		}
 
-		number := 0
+		for _, container := range h.containers {
+			logger.Debugf("Rule %s matched container %s", name, container.ID)
+			go execCmd(container, rule, client, done)
+		}
+
+		i := 0
 		for s := range done {
-			logger.Debugf("cmd resp=%+v", s)
-			number++
-			if number >= len(h.containers) {
+			triggered += s
+			i ++
+			if i >= len(h.containers) {
 				break
 			}
 		}
 	}
+	logger.Infof("Process rules: %d, triggered actions: %d", len(h.ruleset.GetRules()), triggered)
+}
+
+func execCmd(container docker.APIContainers, rule Rule, client *docker.Client, done chan int) error {
+	bashCmd := strings.Replace(rule.target, "CONTAINER", util.GetContainerIP(container), -1)
+	if bashCmd != "" {
+		for i:=0; i < viper.GetInt("check.retries"); i++ {
+			_, err := exec.Command("bash", "-c", bashCmd).Output()
+			if err == nil { // target run successfully, just return
+				logger.Debugf("Do nothing on container %s", container.ID)
+				done <- 0
+				return nil
+			}
+		}
+	}
+	logger.Debugf("Trigger action %s on container %s", rule.action, container.ID)
+	switch rule.action {
+	case "restart":
+		client.RestartContainer(container.ID, 5)
+	case "start":
+		client.StartContainer(container.ID, nil)
+	}
+	done <- 1
+	return nil
 }
 
 
-func execCmd(client *docker.Client, container docker.APIContainers, cmd []string, done chan int) error {
+func execCmdT(client *docker.Client, container docker.APIContainers, cmd []string, done chan int) error {
 	success := make(chan struct{})
 	var stdout, stderr bytes.Buffer
 	var reader = strings.NewReader("send value")
