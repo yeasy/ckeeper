@@ -13,12 +13,14 @@ import (
 
 var logger = logging.MustGetLogger("ckeeper")
 
+// Handler is the processor on the ruleset
 type Handler struct {
 	ruleset    *RuleSet
 	containers []docker.APIContainers
 }
 
-func NewHanlder() *Handler {
+// NewHandler return a initialized Handler object
+func NewHandler() *Handler {
 	handler := Handler{}
 	handler.ruleset = NewRuleSet()
 	return &handler

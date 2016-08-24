@@ -16,6 +16,9 @@ all: check test
 check:
 	go tool vet --all $(SRC)
 	go tool vet --all *.go
+	for d in $(SRC); do \
+		golint $$d;\
+	done
 
 build:
 	go build main.go

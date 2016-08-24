@@ -50,7 +50,7 @@ func init() {
 
 func run() {
 	// TODO: Work your own magic here
-	handler := engine.NewHanlder()
+	handler := engine.NewHandler()
 	var mem runtime.MemStats
 
 	for {
