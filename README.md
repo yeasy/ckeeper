@@ -21,8 +21,8 @@ There are two ways to use ckeeper: docker image (recommended) and local installa
 
 ### Run in container
 ```sh
-$ docker run --rm \
-	 --name ckeeper \
+$ docker run \
+	 -v YOUR_CONFIG_FILE:/cmonit/ckeeper.yaml \
 	 yeasy/ckeeper \
 	 start --logging-level=debug
 ```
