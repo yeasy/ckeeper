@@ -96,7 +96,7 @@ func initConfig() {
 	if err := viper.ReadInConfig(); err != nil {
 		panic(fmt.Errorf("Fatal error when reading config %s: %s\n", util.RootName, err))
 	}
-	logger.Debugf("Load config file: %s\n", viper.ConfigFileUsed())
+	logger.Infof("Load config file: %s\n", viper.ConfigFileUsed())
 
 	viper.SetEnvPrefix(util.RootName)
 	viper.AutomaticEnv() // read in environment variables that match

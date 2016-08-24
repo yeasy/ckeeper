@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"reflect"
+
 	"github.com/fsouza/go-dockerclient"
 )
 
@@ -30,16 +31,15 @@ func SetField(obj interface{}, name string, value interface{}) error {
 	return nil
 }
 
-
 func GetContainerIP(container docker.APIContainers) string {
 	return container.Networks.Networks["bridge"].IPAddress
 }
 
 func ListHasString(value string, list []string) bool {
-    for _, v := range list {
-        if v == value {
-            return true
-        }
-    }
-    return false
+	for _, v := range list {
+		if v == value {
+			return true
+		}
+	}
+	return false
 }

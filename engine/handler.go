@@ -1,16 +1,17 @@
 package engine
 
 import (
+	"bytes"
+	"os/exec"
+	"strings"
+
 	"github.com/fsouza/go-dockerclient"
 	"github.com/op/go-logging"
 	"github.com/spf13/viper"
 	"github.com/yeasy/ckeeper/util"
-	"strings"
-	"bytes"
-	"os/exec"
 )
 
-var logger = logging.MustGetLogger("ckeeper.engine")
+var logger = logging.MustGetLogger("ckeeper")
 
 type Handler struct {
 	ruleset    *RuleSet
@@ -23,18 +24,17 @@ func NewHanlder() *Handler {
 	return &handler
 }
 
-
 // Load will read the rules from config
 func (h *Handler) Load() error {
 	r := Rule{}
 	option := docker.ListContainersOptions{}
-	for name, _:= range viper.GetStringMap("rules") {
-		err := viper.UnmarshalKey("rules." + name + ".option", &option)
+	for name := range viper.GetStringMap("rules") {
+		err := viper.UnmarshalKey("rules."+name+".option", &option)
 		if err != nil {
 			logger.Errorf("unable to decode into struct, %+v", err)
 			return err
 		}
-		if util.ListHasString("rules." + name + ".option.Filters", viper.AllKeys()) {
+		if util.ListHasString("rules."+name+".option.Filters", viper.AllKeys()) {
 			option.Filters = viper.GetStringMapStringSlice("rules." + name + ".option.Filters")
 		}
 		r.name = name
@@ -42,7 +42,7 @@ func (h *Handler) Load() error {
 		r.target = viper.GetString("rules." + name + ".target")
 		r.action = viper.GetString("rules." + name + ".action")
 		logger.Debugf("%s=%+v", name, r)
-		h.ruleset.AddRule(name, r)
+		h.ruleset.AddRule(r)
 	}
 	logger.Infof("Loaded rules: %d", len(h.ruleset.GetRules()))
 	logger.Debugf("%+v", h.ruleset.GetRules())
@@ -73,7 +73,7 @@ func (h *Handler) Process() {
 		i := 0
 		for s := range done {
 			triggered += s
-			i ++
+			i++
 			if i >= len(h.containers) {
 				break
 			}
@@ -85,7 +85,7 @@ func (h *Handler) Process() {
 func execCmd(container docker.APIContainers, rule Rule, client *docker.Client, done chan int) error {
 	bashCmd := strings.Replace(rule.target, "CONTAINER", util.GetContainerIP(container), -1)
 	if bashCmd != "" {
-		for i:=0; i < viper.GetInt("check.retries"); i++ {
+		for i := 0; i < viper.GetInt("check.retries"); i++ {
 			_, err := exec.Command("bash", "-c", bashCmd).Output()
 			if err == nil { // target run successfully, just return
 				logger.Debugf("Do nothing on container %s", container.ID)
@@ -105,7 +105,6 @@ func execCmd(container docker.APIContainers, rule Rule, client *docker.Client, d
 	return nil
 }
 
-
 func execCmdT(client *docker.Client, container docker.APIContainers, cmd []string, done chan int) error {
 	success := make(chan struct{})
 	var stdout, stderr bytes.Buffer
@@ -121,7 +120,7 @@ func execCmdT(client *docker.Client, container docker.APIContainers, cmd []strin
 		ErrorStream:  &stderr,
 		InputStream:  reader,
 		//Tty:true,
-		RawTerminal:  true,
+		RawTerminal: true,
 		//Success:      success,
 	}
 	exec, err := client.CreateExec(createOptions)

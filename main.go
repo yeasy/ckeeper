@@ -14,8 +14,22 @@
 
 package main
 
-import "github.com/yeasy/ckeeper/cmd"
+import (
+	//"net/http"
+	//_ "net/http/pprof"
+
+	"github.com/yeasy/ckeeper/cmd"
+)
 
 func main() {
+
+	/*
+		This is only for profiling.
+		Please visit http://HOST:6060/debug/pprof/ to see the statistics.
+	*/
+	//go func() {
+	//	http.ListenAndServe(":6060", nil)
+	//}()
+
 	cmd.Execute()
 }

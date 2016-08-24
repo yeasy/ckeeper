@@ -5,10 +5,10 @@ import (
 )
 
 type Rule struct {
-	name string
+	name   string
 	option docker.ListContainersOptions
-	target  string
-	action  string
+	target string
+	action string
 }
 
 type RuleSet struct {
@@ -28,8 +28,8 @@ func (rs *RuleSet) GetRules() map[string]Rule {
 	return rs.rules
 }
 
-func (rs *RuleSet) AddRule(name string, r Rule) {
-	rs.rules[name] = r
+func (rs *RuleSet) AddRule(r Rule) {
+	rs.rules[r.name] = r
 }
 
 func (rs *RuleSet) RemoveRule(name string) {

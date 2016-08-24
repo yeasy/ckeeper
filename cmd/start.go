@@ -15,11 +15,12 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
-	"github.com/yeasy/ckeeper/engine"
-	"github.com/spf13/viper"
-	"time"
 	"runtime"
+	"time"
+
+	"github.com/spf13/cobra"
+	"github.com/spf13/viper"
+	"github.com/yeasy/ckeeper/engine"
 )
 
 // startCmd represents the start command
@@ -50,7 +51,7 @@ func init() {
 func run() {
 	// TODO: Work your own magic here
 	handler := engine.NewHanlder()
-	var mem   runtime.MemStats
+	var mem runtime.MemStats
 
 	for {
 		interval := time.Duration(viper.GetInt("check.interval"))

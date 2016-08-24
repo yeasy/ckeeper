@@ -13,12 +13,13 @@ func TestRuleSet_AddRule(t *testing.T) {
 	}
 
 	rule := Rule{
+		"test_rule",
 		docker.ListContainersOptions{All: true},
 		"condition",
 		"action",
 	}
 
-	rs.AddRule("test_rule", rule)
+	rs.AddRule(rule)
 
 	result := rs.GetRules()
 	if result["test_rule"].target != "condition" {
@@ -34,12 +35,13 @@ func TestRuleSet_RemoveRule(t *testing.T) {
 	rs := NewRuleSet()
 
 	rule := Rule{
+		"test_rule",
 		docker.ListContainersOptions{All: true},
 		"condition",
 		"action",
 	}
 
-	rs.AddRule("test_rule", rule)
+	rs.AddRule(rule)
 	rs.RemoveRule("test_rule")
 	if len(rs.GetRules()) != 0 {
 		t.Error("Error to remove a rule")

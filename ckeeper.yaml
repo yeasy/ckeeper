@@ -1,5 +1,5 @@
 logging:
-  level: debug
+  level: info
 host:
   daemon: "unix:///var/run/docker.sock"
 check:
@@ -7,7 +7,7 @@ check:
   interval: 5  # seconds to wait between two checks
 rules:  # currently the rules are processed in order
   rule_web:
-    option:   # container filter
+    option:
       All: true
       Filters:
         status:
@@ -20,5 +20,12 @@ rules:  # currently the rules are processed in order
       Filters:
         status:
           - exited
-          - stopped
+          - paused
     action: "start"
+  rule_test:
+    option:
+      All: true
+      Filters:
+        status:
+          - running
+    action: "ignore"
