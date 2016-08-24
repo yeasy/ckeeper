@@ -1,4 +1,7 @@
 # ckeeper
+
+[![Build Status](https://travis-ci.org/yeasy/ckeeper.svg?branch=master)](https://travis-ci.org/yeasy/ckeeper)
+[![Go Report Card](https://goreportcard.com/badge/github.com/yeasy/ckeeper)](https://goreportcard.com/report/github.com/yeasy/ckeeper)
 Keep the health of container applications.
 
 ckeeper can be deployed on each docker host, and it will automatically check the health status, e.g., validate if the web service online, and run specified operations on `unhealthy` containers, e.g., `restart`.
