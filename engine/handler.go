@@ -96,12 +96,23 @@ func execCmd(container docker.APIContainers, rule Rule, client *docker.Client, d
 			}
 		}
 	}
-	logger.Debugf("Trigger action %s on container %s", rule.action, container.ID)
+	logger.Debugf("Action %s triggered on container %s", rule.action, container.ID)
 	switch rule.action {
-	case "restart":
-		client.RestartContainer(container.ID, 5)
 	case "start":
 		client.StartContainer(container.ID, nil)
+	case "restart":
+		client.RestartContainer(container.ID, 5)
+	case "stop":
+		client.StopContainer(container.ID, 5)
+	case "pause":
+		client.PauseContainer(container.ID)
+	case "unpause":
+		client.UnpauseContainer(container.ID)
+	case "print":
+		logger.Warningf("Rule %s triggered on container %s(%s)", rule.name, container.Names[0], container.ID)
+	case "ignore":
+		fallthrough
+	default:
 	}
 	done <- 1
 	return nil

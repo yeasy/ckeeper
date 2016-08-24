@@ -59,7 +59,15 @@ For each rule:
 
 * `option`: Used to select containers to check health, following the [ListOption](https://docs.docker.com/engine/reference/api/docker_remote_api_v1.24/#list-containers).
 * `target`: Think as healthy if the target cmd's running result is true.
-* `action`: What action to take if the target is not met. If the target is not set, then take action by default.
+* `action`: What action to take if the target is not met. If the target is not set, then take action by default. Valid action values include:
+	* `start`: Start the container
+	* `restart`: Restart the container
+	* `stop`: Stop the container
+	* `pause`: Pause the container
+	* `unpause`: Un-pause the container
+	* `rm`: Remove the container
+	* `print`: Print the information of the matched container
+	* `ignore`: Take no action
 
 The target cmd can be customized easily to achieve flexible health as the user needs.
 

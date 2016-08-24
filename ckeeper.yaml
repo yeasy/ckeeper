@@ -28,4 +28,4 @@ rules:  # currently the rules are processed in order
       Filters:
         status:
           - running
-    action: "ignore"
+    action: "print"
