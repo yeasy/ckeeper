@@ -1,13 +1,6 @@
 package util
 
-import (
-	"errors"
-	"fmt"
-	"reflect"
-
-	"github.com/fsouza/go-dockerclient"
-)
-
+import "github.com/fsouza/go-dockerclient"
 
 // GetContainerIP will return the ip address of the given container
 func GetContainerIP(container docker.APIContainers) string {
